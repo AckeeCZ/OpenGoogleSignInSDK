@@ -40,6 +40,18 @@ func application(_ application: UIApplication,
 }
 ```
 
+### Set presenting view controller
+
+In view controller which will present Google Sign-In flow, set the `presentingViewController` property of `OpenGoogleSignIn` shared instance inside `viewDidLoad()` lifecycle method:
+
+```swift
+override func viewDidLoad() {
+  super.viewDidLoad()
+
+  OpenGoogleSignIn.shared.presentingViewController = self
+}
+```
+
 ### Handle Sign-In process
 
 To handle Sign-In process, you need to set `OpenGoogleSignInDelegate` and implement the protocol:
