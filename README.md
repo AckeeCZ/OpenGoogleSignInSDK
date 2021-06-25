@@ -1,6 +1,6 @@
 # OpenGoogleSignInSDK
 
-OpenGoogleSignInSDK is an open-source library which takes care of Google Sign-In flow using OAuth 2.0 and can be used as an alternative to GoogleSignIn SDK.
+OpenGoogleSignInSDK is an open-source library which takes care of Google Sign-In flow using OAuth 2.0 and can be used as an alternative to [official GoogleSignInSDK](https://developers.google.com/identity/sign-in/ios/sdk).
 
 ## Installation
 
