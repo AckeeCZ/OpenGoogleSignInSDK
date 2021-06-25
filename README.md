@@ -13,6 +13,8 @@ SDK can be installed using [SPM](https://github.com/apple/swift-package-manager)
 ```
 
 or use the Xcode `File -> Swift Packages -> Add Package Dependency` and paste the URL of GitHub repository.
+### CocoaPods, Carthage
+🔜👀
 
 ## Integration guide
 
