@@ -43,6 +43,9 @@ public final class OpenGoogleSignIn: NSObject {
     
     /// Google API OAuth 2.0 token url.
     private static let tokenURL: URL? = URL(string: "https://www.googleapis.com/oauth2/v4/token")
+    
+    /// Google API profile url
+    private static let profileURL: URL? = URL(string: "https://www.googleapis.com/oauth2/v1/userinfo?alt=json")
 
     /// The client's redirect URI, which is based on `clientID`.
     private var redirectURI: String {
@@ -148,7 +151,42 @@ public final class OpenGoogleSignIn: NSObject {
             return
         }
         
-        let task = session.dataTask(with: tokenRequest) { data, response, error in
+        makeRequest(tokenRequest) { result in
+            switch result {
+            case let .success(data):
+                do {
+                    var user = try self.decodeUser(from: data)
+                    
+                    guard let profileRequest = self.makeProfileRequest(user: user) else {
+                        completion(.success(user))
+                        return
+                    }
+                    
+                    self.makeRequest(profileRequest) { result in
+                        switch result {
+                        case let .success(data):
+                            let decoder = JSONDecoder()
+                            decoder.keyDecodingStrategy = .convertFromSnakeCase
+                            let profile = try? decoder.decode(GoogleUser.Profile.self, from: data)
+                            user.profile = profile
+                            completion(.success(user))
+                            
+                        case let .failure(error):
+                            completion(.failure(error))
+                        }
+                    }
+                } catch {
+                    completion(.failure(.tokenDecodingError(error)))
+                }
+                
+            case let .failure(error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    private func makeRequest(_ request: URLRequest, completion: @escaping (Result<Data, GoogleSignInError>) -> Void) {
+        let task = session.dataTask(with: request) { data, response, error in
             if let error = error {
                 completion(.failure(.networkError(error)))
                 return
@@ -159,11 +197,7 @@ public final class OpenGoogleSignIn: NSObject {
                 return
             }
 
-            do {
-                completion(.success(try self.decodeUser(from: data)))
-            } catch {
-                completion(.failure(.tokenDecodingError(error)))
-            }
+            completion(.success(data))
         }
         task.resume()
     }
@@ -196,6 +230,16 @@ public final class OpenGoogleSignIn: NSObject {
             .joined(separator: "&")
         
         request.httpBody = body.data(using: .utf8)
+        
+        return request
+    }
+    
+    /// Returns `URLRequest` to retrieve user's profile data
+    private func makeProfileRequest(user: GoogleUser) -> URLRequest? {
+        guard let profileURL = OpenGoogleSignIn.profileURL else { return nil }
+        
+        var request = URLRequest(url: profileURL)
+        request.setValue("Bearer \(user.accessToken)", forHTTPHeaderField: "Authorization")
         
         return request
     }
