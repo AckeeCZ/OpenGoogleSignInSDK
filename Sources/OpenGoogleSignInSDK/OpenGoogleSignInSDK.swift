@@ -140,6 +140,9 @@ public final class OpenGoogleSignIn: NSObject {
     }
     
     /// Handles OAuth 2.0 token response.
+    ///
+    /// After successful authentication we made another request
+    /// to obtain user's profile data, e.g. email and name.
     private func handleTokenResponse(using redirectUrl: URL, completion: @escaping (Result<GoogleUser, GoogleSignInError>) -> Void) {
         guard let code = self.parseCode(from: redirectUrl) else {
             completion(.failure(.invalidCode))
@@ -162,10 +165,6 @@ public final class OpenGoogleSignIn: NSObject {
                         return
                     }
                     
-                    // To obtain profile data we need to make another request.
-                    // If the request fails, we only log the error
-                    // and call completion with the `GoogleUser` object
-                    // without his profile info.
                     self.makeRequest(profileRequest) { result in
                         switch result {
                         case let .success(data):
@@ -176,8 +175,7 @@ public final class OpenGoogleSignIn: NSObject {
                             completion(.success(user))
                             
                         case let .failure(error):
-                            os_log(.error, "Profile request failed with error: %@", error.localizedDescription)
-                            completion(.success(user))
+                            completion(.failure(.noProfile(error)))
                         }
                     }
                 } catch {
