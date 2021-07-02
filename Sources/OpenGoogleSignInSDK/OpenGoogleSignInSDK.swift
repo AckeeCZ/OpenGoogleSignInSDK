@@ -162,6 +162,10 @@ public final class OpenGoogleSignIn: NSObject {
                         return
                     }
                     
+                    // To obtain profile data we need to make another request.
+                    // If the request fails, we only log the error
+                    // and call completion with the `GoogleUser` object
+                    // without his profile info.
                     self.makeRequest(profileRequest) { result in
                         switch result {
                         case let .success(data):
@@ -172,7 +176,8 @@ public final class OpenGoogleSignIn: NSObject {
                             completion(.success(user))
                             
                         case let .failure(error):
-                            completion(.failure(error))
+                            os_log(.error, "Profile request failed with error: %@", error.localizedDescription)
+                            completion(.success(user))
                         }
                     }
                 } catch {
@@ -185,6 +190,7 @@ public final class OpenGoogleSignIn: NSObject {
         }
     }
     
+    /// Wrapper for easier `URLRequest` handling.
     private func makeRequest(_ request: URLRequest, completion: @escaping (Result<Data, GoogleSignInError>) -> Void) {
         let task = session.dataTask(with: request) { data, response, error in
             if let error = error {

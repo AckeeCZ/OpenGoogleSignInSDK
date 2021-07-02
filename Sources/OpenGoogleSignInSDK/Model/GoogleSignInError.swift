@@ -1,7 +1,7 @@
 import Foundation
 
 /// Google sign-in error.
-public enum GoogleSignInError: Error, Equatable {
+public enum GoogleSignInError: Equatable {
     case authenticationError(Error)
     case invalidCode
     case invalidResponse
@@ -9,6 +9,27 @@ public enum GoogleSignInError: Error, Equatable {
     case networkError(Error)
     case tokenDecodingError(Error)
     case userCancelledSignInFlow
+}
+
+extension GoogleSignInError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case let .authenticationError(error):
+            return "authenticationError, underlying error \(error.localizedDescription)"
+        case .invalidCode:
+            return "invalidCode"
+        case .invalidResponse:
+            return "invalidResponse"
+        case .invalidTokenRequest:
+            return "invalidTokenRequest"
+        case let .networkError(error):
+            return "network, underlying error \(error.localizedDescription)"
+        case let .tokenDecodingError(error):
+            return "tokenDecoding, underlying error \(error.localizedDescription)"
+        case .userCancelledSignInFlow:
+            return "userCancelledSignInFlow"
+        }
+    }
 }
 
 public func == (lhs: Error, rhs: Error) -> Bool {
