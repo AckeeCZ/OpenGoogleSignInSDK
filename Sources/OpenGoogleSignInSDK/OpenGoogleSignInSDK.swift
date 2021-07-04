@@ -106,7 +106,13 @@ public final class OpenGoogleSignIn: NSObject {
             url: authURL,
             callbackURLScheme: clientID
         ) { [weak self] callbackURL, error in
-            guard let callbackURL = callbackURL else { return }
+            guard let callbackURL = callbackURL else {
+                if error != nil {
+                    // No callback URL with error means user cancelled the flow
+                    self?.delegate?.sign(didSignInFor: nil, withError: .userCancelledSignInFlow)
+                }
+                return
+            }
 
             if let error = error {
                 // Throw error if received
