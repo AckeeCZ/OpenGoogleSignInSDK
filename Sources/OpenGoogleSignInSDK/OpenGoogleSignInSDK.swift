@@ -133,10 +133,7 @@ public final class OpenGoogleSignIn: NSObject {
     
     /// Decodes `GoogleUser` from OAuth 2.0 response.
     private func decodeUser(from data: Data) throws -> GoogleUser {
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        
-        return try decoder.decode(GoogleUser.self, from: data)
+        try JSONDecoder.app.decode(GoogleUser.self, from: data)
     }
     
     /// Handles OAuth 2.0 token response.
@@ -168,9 +165,7 @@ public final class OpenGoogleSignIn: NSObject {
                     self.makeRequest(profileRequest) { result in
                         switch result {
                         case let .success(data):
-                            let decoder = JSONDecoder()
-                            decoder.keyDecodingStrategy = .convertFromSnakeCase
-                            let profile = try? decoder.decode(GoogleUser.Profile.self, from: data)
+                            let profile = try? JSONDecoder.app.decode(GoogleUser.Profile.self, from: data)
                             user.profile = profile
                             completion(.success(user))
                             
