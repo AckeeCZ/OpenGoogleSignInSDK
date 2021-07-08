@@ -5,7 +5,6 @@ public enum GoogleSignInError: Error, Equatable {
     case authenticationError(Error)
     case invalidCode
     case invalidResponse
-    case invalidTokenRequest
     case networkError(Error)
     case tokenDecodingError(Error)
     case userCancelledSignInFlow

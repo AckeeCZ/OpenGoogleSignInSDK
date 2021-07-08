@@ -141,13 +141,13 @@ public final class OpenGoogleSignIn: NSObject {
     /// After successful authentication we made another request
     /// to obtain user's profile data, e.g. email and name.
     private func handleTokenResponse(using redirectUrl: URL, completion: @escaping (Result<GoogleUser, GoogleSignInError>) -> Void) {
-        guard let code = self.parseCode(from: redirectUrl) else {
+        guard let code = parseCode(from: redirectUrl) else {
             completion(.failure(.invalidCode))
             return
         }
         
         guard let tokenRequest = makeTokenRequest(with: code) else {
-            completion(.failure(.invalidTokenRequest))
+            assertionFailure("Invalid token request")
             return
         }
         
@@ -155,23 +155,12 @@ public final class OpenGoogleSignIn: NSObject {
             switch result {
             case let .success(data):
                 do {
-                    var user = try self.decodeUser(from: data)
+                    let user = try self.decodeUser(from: data)
                     
-                    guard let profileRequest = self.makeProfileRequest(user: user) else {
+                    if self.scopes.contains(.email) || self.scopes.contains(.profile) {
+                        self.fetchProfile(user: user, completion: completion)
+                    } else {
                         completion(.success(user))
-                        return
-                    }
-                    
-                    self.makeRequest(profileRequest) { result in
-                        switch result {
-                        case let .success(data):
-                            let profile = try? JSONDecoder.app.decode(GoogleUser.Profile.self, from: data)
-                            user.profile = profile
-                            completion(.success(user))
-                            
-                        case let .failure(error):
-                            completion(.failure(.noProfile(error)))
-                        }
                     }
                 } catch {
                     completion(.failure(.tokenDecodingError(error)))
@@ -179,6 +168,27 @@ public final class OpenGoogleSignIn: NSObject {
                 
             case let .failure(error):
                 completion(.failure(error))
+            }
+        }
+    }
+
+    private func fetchProfile(user: GoogleUser, completion: @escaping (Result<GoogleUser, GoogleSignInError>) -> Void) {
+        guard let profileRequest = makeProfileRequest(user: user) else {
+            assertionFailure("Invalid profile request")
+            return
+        }
+        
+        var user = user
+        
+        makeRequest(profileRequest) { result in
+            switch result {
+            case let .success(data):
+                let profile = try? JSONDecoder.app.decode(GoogleUser.Profile.self, from: data)
+                user.profile = profile
+                completion(.success(user))
+                
+            case let .failure(error):
+                completion(.failure(.noProfile(error)))
             }
         }
     }
@@ -209,7 +219,7 @@ public final class OpenGoogleSignIn: NSObject {
     }
     
     /// Returns `URLRequest` to retrieve Google sign-in OAuth 2.0 token using arameters provided by the app.
-    private func makeTokenRequest(with code: String) -> URLRequest? {
+    func makeTokenRequest(with code: String) -> URLRequest? {
         guard let tokenURL = OpenGoogleSignIn.tokenURL else { return nil }
         
         var request = URLRequest(url: tokenURL)
@@ -234,7 +244,7 @@ public final class OpenGoogleSignIn: NSObject {
     }
     
     /// Returns `URLRequest` to retrieve user's profile data
-    private func makeProfileRequest(user: GoogleUser) -> URLRequest? {
+    func makeProfileRequest(user: GoogleUser) -> URLRequest? {
         guard let profileURL = OpenGoogleSignIn.profileURL else { return nil }
         
         var request = URLRequest(url: profileURL)
