@@ -74,6 +74,28 @@ final class OpenGoogleSignInTests: XCTestCase {
         XCTAssertNotNil(mockDelegate.user)
     }
     
+    // Since `URL` has optional initializer we need to
+    // check if the URL provided by us is valid and
+    // therefore we don't need to worry about this edge case.
+    func test_tokenRequest_isValid() {
+        // When
+        let request = sharedInstance.makeTokenRequest(with: "code")
+        
+        // Then
+        XCTAssertNotNil(request)
+    }
+    
+    // Since `URL` has optional initializer we need to
+    // check if the URL provided by us is valid and
+    // therefore we don't need to worry about this edge case.
+    func test_profileRequest_isValid() {
+        // Given
+        let user = mockUser()
+        
+        // Then
+        XCTAssertNotNil(sharedInstance.makeProfileRequest(user: user))
+    }
+    
     // MARK: - Private helpers
     
     private func mockUser() -> GoogleUser {
