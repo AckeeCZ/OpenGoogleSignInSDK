@@ -238,7 +238,7 @@ public final class OpenGoogleSignIn: NSObject {
         guard let profileURL = OpenGoogleSignIn.profileURL else { return nil }
         
         var request = URLRequest(url: profileURL)
-        request.setValue("Bearer \(user.accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer " + user.accessToken, forHTTPHeaderField: "Authorization")
         
         return request
     }
