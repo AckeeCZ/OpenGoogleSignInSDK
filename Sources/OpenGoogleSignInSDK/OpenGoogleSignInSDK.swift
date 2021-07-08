@@ -156,12 +156,7 @@ public final class OpenGoogleSignIn: NSObject {
             case let .success(data):
                 do {
                     let user = try self.decodeUser(from: data)
-                    
-                    if self.scopes.contains(.email) || self.scopes.contains(.profile) {
-                        self.fetchProfile(user: user, completion: completion)
-                    } else {
-                        completion(.success(user))
-                    }
+                    self.fetchProfile(user: user, completion: completion)
                 } catch {
                     completion(.failure(.tokenDecodingError(error)))
                 }
