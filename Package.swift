@@ -10,15 +10,18 @@ let package = Package(
     products: [
         .library(
             name: "OpenGoogleSignInSDK",
-            targets: ["OpenGoogleSignInSDK"]),
+            targets: ["OpenGoogleSignInSDK"]
+        ),
     ],
     dependencies: [],
     targets: [
         .target(
             name: "OpenGoogleSignInSDK",
-            dependencies: []),
+            dependencies: []
+        ),
         .testTarget(
             name: "OpenGoogleSignInSDKTests",
-            dependencies: ["OpenGoogleSignInSDK"]),
+            dependencies: ["OpenGoogleSignInSDK"]
+        ),
     ]
 )
