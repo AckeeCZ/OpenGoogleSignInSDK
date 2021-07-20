@@ -11,7 +11,7 @@ let package = Package(
         .library(
             name: "OpenGoogleSignInSDK",
             targets: ["OpenGoogleSignInSDK"]
-        ),
+        )
     ],
     dependencies: [],
     targets: [
@@ -22,6 +22,6 @@ let package = Package(
         .testTarget(
             name: "OpenGoogleSignInSDKTests",
             dependencies: ["OpenGoogleSignInSDK"]
-        ),
+        )
     ]
 )
