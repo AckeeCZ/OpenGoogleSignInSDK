@@ -5,10 +5,34 @@ public enum GoogleSignInError: Error, Equatable {
     case authenticationError(Error)
     case invalidCode
     case invalidResponse
+    case invalidTokenRequest
     case networkError(Error)
     case tokenDecodingError(Error)
     case userCancelledSignInFlow
     case noProfile(Error)
+}
+
+extension GoogleSignInError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case let .authenticationError(error):
+            return "authenticationError, underlying error \(error.localizedDescription)"
+        case .invalidCode:
+            return "invalidCode"
+        case .invalidResponse:
+            return "invalidResponse"
+        case .invalidTokenRequest:
+            return "invalidTokenRequest"
+        case let .networkError(error):
+            return "network, underlying error \(error.localizedDescription)"
+        case let .tokenDecodingError(error):
+            return "tokenDecoding, underlying error \(error.localizedDescription)"
+        case .userCancelledSignInFlow:
+            return "userCancelledSignInFlow"
+        case let .noProfile(error):
+            return "noProfile, underlying error \(error.localizedDescription)"
+        }
+    }
 }
 
 public func == (lhs: Error, rhs: Error) -> Bool {

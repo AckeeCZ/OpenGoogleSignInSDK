@@ -1,6 +1,13 @@
 import AuthenticationServices
 import OSLog
+
+#if os(iOS)
 import UIKit
+public typealias ViewController = UIViewController
+#elseif os(macOS)
+import AppKit
+public typealias ViewController = NSViewController
+#endif
 
 /// Google sign-in delegate.
 public protocol OpenGoogleSignInDelegate: AnyObject {
@@ -36,16 +43,16 @@ public final class OpenGoogleSignIn: NSObject {
     
     /// View controller to present Google sign-in flow.
     /// Needs to be set for presenting to work correctly.
-    public weak var presentingViewController: UIViewController? = nil
-
+    public weak var presentingViewController: ViewController? = nil
+    
     // MARK: - Private properties
 
     /// Session used to authenticate a user with Google sign-in.
     private var authenticationSession: ASWebAuthenticationSession? = nil
-
+    
     /// Google API OAuth 2.0 token url.
     private static let tokenURL: URL? = URL(string: "https://www.googleapis.com/oauth2/v4/token")
-
+    
     /// Google API profile url
     private static let profileURL: URL? = URL(string: "https://www.googleapis.com/oauth2/v1/userinfo?alt=json")
 
@@ -221,7 +228,7 @@ public final class OpenGoogleSignIn: NSObject {
     }
     
     /// Returns `URLRequest` to retrieve Google sign-in OAuth 2.0 token using arameters provided by the app.
-    func makeTokenRequest(with code: String) -> URLRequest? {
+    private func makeTokenRequest(with code: String) -> URLRequest? {
         guard let tokenURL = OpenGoogleSignIn.tokenURL else { return nil }
 
         var request = URLRequest(url: tokenURL)
@@ -235,6 +242,7 @@ public final class OpenGoogleSignIn: NSObject {
             "grant_type": "authorization_code",
             "redirect_uri": redirectURI
         ]
+        
         if let audience = audience {
             parameters["audience"] = audience
         }
@@ -249,7 +257,7 @@ public final class OpenGoogleSignIn: NSObject {
     }
 
     /// Returns `URLRequest` to retrieve user's profile data
-    func makeProfileRequest(user: GoogleUser) -> URLRequest? {
+    private func makeProfileRequest(user: GoogleUser) -> URLRequest? {
         guard let profileURL = OpenGoogleSignIn.profileURL else { return nil }
 
         var request = URLRequest(url: profileURL)
@@ -263,6 +271,6 @@ public final class OpenGoogleSignIn: NSObject {
 
 extension OpenGoogleSignIn: ASWebAuthenticationPresentationContextProviding {
     public func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        UIApplication.shared.windows.first { $0.isKeyWindow } ?? ASPresentationAnchor()
+        presentingViewController?.view.window ?? ASPresentationAnchor()
     }
 }
