@@ -5,7 +5,7 @@ let package = Package(
     name: "OpenGoogleSignInSDK",
     platforms: [
         .iOS(.v12),
-        .macOS("10.9")
+        .macOS(.v10_15)
     ],
     products: [
         .library(
