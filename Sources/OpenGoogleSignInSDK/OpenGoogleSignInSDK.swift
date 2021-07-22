@@ -1,6 +1,13 @@
 import AuthenticationServices
 import OSLog
+
+#if os(iOS)
 import UIKit
+public typealias ViewController = UIViewController
+#elseif os(macOS)
+import AppKit
+public typealias ViewController = NSViewController
+#endif
 
 /// Google sign-in delegate.
 public protocol OpenGoogleSignInDelegate: AnyObject {
@@ -14,34 +21,34 @@ public final class OpenGoogleSignIn: NSObject {
     // MARK: - Public properties
 
     public weak var delegate: OpenGoogleSignInDelegate?
-    
+
     /// The client ID of the app.
     /// It is required for communication with Google API to work.
     public var clientID: String = ""
-    
+
     public var audience: String?
 
     /// Client secret.
     /// It is only used when exchanging the authorization code for an access token.
     public var clientSecret: String = ""
-    
+
     /// `URLSession` used to perform data tasks.
     public var session: URLSession = URLSession.shared
-    
+
     /// Shared `OpenGoogleSignIn` instance
     public static let shared: OpenGoogleSignIn = OpenGoogleSignIn()
-    
+
     /// API scopes requested by the app
     public var scopes: Set<GoogleSignInScope> = [.email, .openID, .profile]
-    
+
     /// View controller to present Google sign-in flow.
     /// Needs to be set for presenting to work correctly.
-    public weak var presentingViewController: UIViewController? = nil
+    public weak var presentingViewController: ViewController?
 
     // MARK: - Private properties
 
     /// Session used to authenticate a user with Google sign-in.
-    private var authenticationSession: ASWebAuthenticationSession? = nil
+    private var authenticationSession: ASWebAuthenticationSession?
 
     /// Google API OAuth 2.0 token url.
     private static let tokenURL: URL? = URL(string: "https://www.googleapis.com/oauth2/v4/token")
@@ -72,7 +79,7 @@ public final class OpenGoogleSignIn: NSObject {
             URLQueryItem(name: "client_id", value: clientID),
             URLQueryItem(name: "redirect_uri", value: redirectURI),
             URLQueryItem(name: "response_type", value: "code"),
-            URLQueryItem(name: "scope", value: scopes),
+            URLQueryItem(name: "scope", value: scopes)
         ]
 
         return components.url!
@@ -137,7 +144,7 @@ public final class OpenGoogleSignIn: NSObject {
     }
 
     // MARK: - Private helpers
-    
+
     /// Decodes `GoogleUser` from OAuth 2.0 response.
     private func decodeUser(from data: Data) throws -> GoogleUser {
         try JSONDecoder.app.decode(GoogleUser.self, from: data)
@@ -188,7 +195,7 @@ public final class OpenGoogleSignIn: NSObject {
                 let profile = try? JSONDecoder.app.decode(GoogleUser.Profile.self, from: data)
                 user.profile = profile
                 completion(.success(user))
-                
+
             case let .failure(error):
                 completion(.failure(.noProfile(error)))
             }
@@ -212,16 +219,16 @@ public final class OpenGoogleSignIn: NSObject {
         }
         task.resume()
     }
-    
+
     /// Returns `code` parsed from provided `redirectURL`.
     private func parseCode(from redirectURL: URL) -> String? {
         let components = URLComponents(url: redirectURL, resolvingAgainstBaseURL: false)
 
         return components?.queryItems?.first(where: { $0.name == "code" })?.value
     }
-    
+
     /// Returns `URLRequest` to retrieve Google sign-in OAuth 2.0 token using arameters provided by the app.
-    func makeTokenRequest(with code: String) -> URLRequest? {
+    private func makeTokenRequest(with code: String) -> URLRequest? {
         guard let tokenURL = OpenGoogleSignIn.tokenURL else { return nil }
 
         var request = URLRequest(url: tokenURL)
@@ -235,6 +242,7 @@ public final class OpenGoogleSignIn: NSObject {
             "grant_type": "authorization_code",
             "redirect_uri": redirectURI
         ]
+
         if let audience = audience {
             parameters["audience"] = audience
         }
@@ -244,12 +252,12 @@ public final class OpenGoogleSignIn: NSObject {
             .joined(separator: "&")
 
         request.httpBody = body.data(using: .utf8)
-        
+
         return request
     }
 
     /// Returns `URLRequest` to retrieve user's profile data
-    func makeProfileRequest(user: GoogleUser) -> URLRequest? {
+    private func makeProfileRequest(user: GoogleUser) -> URLRequest? {
         guard let profileURL = OpenGoogleSignIn.profileURL else { return nil }
 
         var request = URLRequest(url: profileURL)
@@ -263,6 +271,6 @@ public final class OpenGoogleSignIn: NSObject {
 
 extension OpenGoogleSignIn: ASWebAuthenticationPresentationContextProviding {
     public func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        UIApplication.shared.windows.first { $0.isKeyWindow } ?? ASPresentationAnchor()
+        presentingViewController?.view.window ?? ASPresentationAnchor()
     }
 }

@@ -5,20 +5,23 @@ let package = Package(
     name: "OpenGoogleSignInSDK",
     platforms: [
         .iOS(.v12),
-        .macOS("10.9")
+        .macOS(.v10_15)
     ],
     products: [
         .library(
             name: "OpenGoogleSignInSDK",
-            targets: ["OpenGoogleSignInSDK"]),
+            targets: ["OpenGoogleSignInSDK"]
+        )
     ],
     dependencies: [],
     targets: [
         .target(
             name: "OpenGoogleSignInSDK",
-            dependencies: []),
+            dependencies: []
+        ),
         .testTarget(
             name: "OpenGoogleSignInSDKTests",
-            dependencies: ["OpenGoogleSignInSDK"]),
+            dependencies: ["OpenGoogleSignInSDK"]
+        )
     ]
 )

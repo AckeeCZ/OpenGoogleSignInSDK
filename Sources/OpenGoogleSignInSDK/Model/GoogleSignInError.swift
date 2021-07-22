@@ -18,7 +18,7 @@ public func == (lhs: Error, rhs: Error) -> Bool {
     return error1.domain == error2.domain && error1.code == error2.code && "\(lhs)" == "\(rhs)"
 }
 
-extension Equatable where Self : Error {
+extension Equatable where Self: Error {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs as Error == rhs as Error
     }
