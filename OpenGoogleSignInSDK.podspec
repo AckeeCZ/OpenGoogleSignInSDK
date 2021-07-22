@@ -1,7 +1,7 @@
 
 Pod::Spec.new do |s|
   s.name = "OpenGoogleSignInSDK"
-  s.version = "1.0.0"
+  s.version = "1.1.0"
   s.summary = "OpenGoogleSignInSDK takes care of Google Sign-In flow using OAuth 2.0."
   s.description = <<-DESC
   OpenGoogleSignInSDK is an open-source library which takes care of Google Sign-In flow using OAuth 2.0 and can be used as an alternative to official GoogleSignInSDK
